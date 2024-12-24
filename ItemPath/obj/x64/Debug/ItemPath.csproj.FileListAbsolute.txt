@@ -1,0 +1,6 @@
+C:\Users\Nasir Shahbaz\Desktop\ItemPath\ItemPath\x64\Debug\ItemPath.dll
+C:\Users\Nasir Shahbaz\Desktop\ItemPath\ItemPath\x64\Debug\ItemPath.pdb
+C:\Users\Nasir Shahbaz\Desktop\ItemPath\ItemPath\obj\x64\Debug\ItemPath.csproj.AssemblyReference.cache
+C:\Users\Nasir Shahbaz\Desktop\ItemPath\ItemPath\obj\x64\Debug\ItemPath.csproj.CoreCompileInputs.cache
+C:\Users\Nasir Shahbaz\Desktop\ItemPath\ItemPath\obj\x64\Debug\ItemPath.dll
+C:\Users\Nasir Shahbaz\Desktop\ItemPath\ItemPath\obj\x64\Debug\ItemPath.pdb
