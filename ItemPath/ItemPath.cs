@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -11,6 +12,9 @@ namespace PluginItemPath
     internal class Measure
     {
         private API _api;
+        private string OnCompleteAction;
+        private string _latestResult; 
+
         public string MeasureType { get; set; }
         public string FileType { get; set; }
         public string VarName { get; set; }
@@ -28,16 +32,17 @@ namespace PluginItemPath
             CopyPathVar = string.Empty;
             CopyPath = string.Empty;
             IniPath = string.Empty;
+            _latestResult = string.Empty;
         }
 
         public void Reload(API api, ref double maxValue)
         {
-            _api = api; 
+            _api = api;
+            OnCompleteAction = api.ReadString("OnCompleteAction", "").Trim();
         }
 
         public void Execute(string args)
         {
-           
             ParseArguments(args);
 
             if (string.IsNullOrEmpty(IniPath))
@@ -69,7 +74,6 @@ namespace PluginItemPath
 
         private void ExecuteChooseFile()
         {
-           
             using (OpenFileDialog dialog = new OpenFileDialog())
             {
                 dialog.Filter = CreateFilter(FileType);
@@ -80,20 +84,21 @@ namespace PluginItemPath
                     string selectedFile = dialog.FileName;
                     string fileName = Path.GetFileName(selectedFile);
 
-                    
                     string copiedFilePath = CopyFileToPath(selectedFile);
+                    string destinationFile = Path.Combine(CopyPath, Path.GetFileName(selectedFile));
 
-                  
                     WriteVariablesToIni(fileName, selectedFile, copiedFilePath);
 
+                    _latestResult = string.Join("|", fileName, selectedFile, destinationFile ?? ""); 
+
                     _api.Log(API.LogType.Debug, $"ItemPath.dll: File '{fileName}' processed and copied successfully.");
+                    
                 }
             }
         }
 
         private void ExecuteChooseFolder()
         {
-           
             using (FolderBrowserDialog dialog = new FolderBrowserDialog())
             {
                 dialog.Description = "Select a Folder";
@@ -104,10 +109,13 @@ namespace PluginItemPath
                     string selectedFolder = dialog.SelectedPath;
                     string folderName = new DirectoryInfo(selectedFolder).Name;
 
-                   
                     WriteVariablesToIni(folderName, selectedFolder, null);
 
+                    _latestResult = string.Join("|", folderName, selectedFolder);
+
                     _api.Log(API.LogType.Debug, $"ItemPath.dll: Folder '{folderName}' selected successfully.");
+
+                  
                 }
             }
         }
@@ -125,7 +133,7 @@ namespace PluginItemPath
             string destinationFile = Path.Combine(CopyPath, Path.GetFileName(sourceFile));
             File.Copy(sourceFile, destinationFile, overwrite: true);
 
-            return destinationFile; 
+            return destinationFile;
         }
 
         private void WriteVariablesToIni(string name, string path, string copiedFilePath)
@@ -133,11 +141,9 @@ namespace PluginItemPath
             var iniLines = File.Exists(IniPath) ? File.ReadAllLines(IniPath) : new string[0];
             var iniContent = new List<string>(iniLines);
 
-            
             UpdateOrAddVariable(iniContent, VarName, name);
             UpdateOrAddVariable(iniContent, VarPath, path);
 
-        
             if (!string.IsNullOrEmpty(CopyPathVar) && copiedFilePath != null)
             {
                 UpdateOrAddVariable(iniContent, CopyPathVar, copiedFilePath);
@@ -209,6 +215,12 @@ namespace PluginItemPath
             string filter = string.Join(";", extensions.Select(ext => $"*{ext.Trim()}"));
             return $"Supported Files ({filter})|{filter}|All Files|*.*";
         }
+
+        public string GetLatestResult()
+        {
+            _api.Execute(OnCompleteAction);
+            return _latestResult;
+        }
     }
 
     public static class Plugin
@@ -243,6 +255,14 @@ namespace PluginItemPath
         {
             Measure measure = (Measure)GCHandle.FromIntPtr(data).Target;
             measure.Execute(args);
+        }
+
+        [DllExport]
+        public static IntPtr GetString(IntPtr data)
+        {
+            Measure measure = (Measure)GCHandle.FromIntPtr(data).Target;
+            string result = measure.GetLatestResult();
+            return Marshal.StringToHGlobalUni(result);
         }
     }
 }
