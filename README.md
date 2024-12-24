@@ -51,27 +51,43 @@ Update=1000
 [MeasurePath]
 Measure=Plugin
 Plugin=ItemPath
+OnCompleteAction=[!Log "[MeasurePath]"]
+DynamicVariables=1
 
 [Button]
 Meter=String
-Text=Choose a File
-W=200
+Text=Choose a File 
+W=400
 H=40
 SolidColor=47,47,47
 FontSize=18
 AntiAlias=1
-LeftMouseUpAction=[!CommandMeasure MeasurePath "MeasureType=ChooseFile|FileType=.txt,.png|VarName=FileName|VarPath=FilePath|IniPath=#@#Vars.nek|CopyPathVar=File|CopyPath=#@#CopyFolder"]
+DynamicVariables=1
+LeftMouseUpAction=[!CommandMeasure MeasurePath "MeasureType=ChooseFile|FileType=.txt,.png|VarName=FileName|VarPath=FilePath|IniPath=#@#Vars.nek|CopyPathVar=CopyFilePath|CopyPath=#@#CopyFolder"]
 
 [Button1]
 Meter=String
 Text=Choose a Folder
-W=200
+W=400
 H=40
 Y=5R
 FontSize=18
 SolidColor=47,47,47
 AntiAlias=1
+DynamicVariables=1
 LeftMouseUpAction=[!CommandMeasure MeasurePath "MeasureType=ChooseFolder|VarName=FolderName|VarPath=FolderPath|IniPath=#@#Vars.nek"]
+
+[Result]
+Meter=String
+Text=Result: [MeasurePath]
+W=400
+H=40
+Y=5R
+FontSize=18
+SolidColor=47,47,47
+AntiAlias=1
+DynamicVariables=1
+
 ```
 
 ---
